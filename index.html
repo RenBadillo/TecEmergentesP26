@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>UR3 Digital Twin — Unity XR | Documentación Completa</title>
+    <title>UR3 Digital Twin — Unity XR | Documentación</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -17,65 +17,36 @@
             --radius-lg: 32px;
             --radius-md: 20px;
             --shadow: 0 12px 35px rgba(0,0,0,0.06);
-            --transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+            --transition: all 0.3s ease;
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Inter', sans-serif;
-        }
-
-        body {
-            background-color: var(--bg-light);
-            color: var(--text-dark);
-            line-height: 1.7;
-            overflow-x: hidden;
-            scroll-behavior: smooth;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { background-color: var(--bg-light); color: var(--text-dark); line-height: 1.7; overflow-x: hidden; }
 
         h1, h2, h3 { font-weight: 800; line-height: 1.2; }
-        h1 { font-size: 3.5rem; margin-bottom: 1.5rem; letter-spacing: -1px; }
-        h2 { font-size: 2.4rem; margin-bottom: 2rem; color: var(--primary); letter-spacing: -0.5px; }
-        h3 { font-size: 1.6rem; margin-bottom: 1rem; }
+        h1 { font-size: 3.2rem; margin-bottom: 1.5rem; letter-spacing: -1px; }
+        h2 { font-size: 2.2rem; margin-bottom: 2rem; color: var(--primary); letter-spacing: -0.5px; }
+        h3 { font-size: 1.5rem; margin-bottom: 1rem; }
         p { margin-bottom: 1.2rem; color: #4A4A5A; font-size: 1.05rem; }
-        code { 
-            background: rgba(0,0,0,0.05); 
-            padding: 0.2rem 0.5rem; 
-            border-radius: 6px; 
-            font-family: monospace; 
-            color: var(--primary); 
-            font-weight: 600;
-        }
+        code { background: rgba(0,0,0,0.05); padding: 0.2rem 0.5rem; border-radius: 6px; font-family: monospace; color: var(--primary); font-weight: 600; }
+        pre { background: #1A1A24; color: #E0E0E0; padding: 1.5rem; border-radius: var(--radius-md); overflow-x: auto; margin-bottom: 1.5rem; font-family: monospace; font-size: 0.95rem; }
 
-        .container {
-            display: flex;
-            max-width: 1440px;
-            margin: 0 auto;
-            padding: 3rem 2rem;
-            gap: 3rem;
-        }
+        .container { display: flex; max-width: 1440px; margin: 0 auto; padding: 3rem 2rem; gap: 3rem; }
 
+        /* --- Menú Lateral --- */
         .sidebar {
-            width: 280px;
+            width: 300px;
             position: sticky;
             top: 3rem;
             height: fit-content;
             background: var(--card-bg);
             border-radius: var(--radius-lg);
-            padding: 2.5rem 2rem;
+            padding: 2.5rem 1.5rem;
             box-shadow: var(--shadow);
         }
 
-        .sidebar-header h3 {
-            color: var(--primary);
-            text-align: center;
-            margin-bottom: 1.5rem;
-            font-size: 1.4rem;
-        }
-
-        .nav-links { list-style: none; display: flex; flex-direction: column; gap: 0.8rem; }
+        .sidebar-header h3 { color: var(--primary); text-align: center; margin-bottom: 2rem; font-size: 1.4rem; }
+        .nav-links { list-style: none; display: flex; flex-direction: column; gap: 0.5rem; }
         .nav-links li { width: 100%; }
         .nav-links a {
             text-decoration: none;
@@ -85,53 +56,35 @@
             border-radius: var(--radius-md);
             display: block;
             transition: var(--transition);
-            border-left: 4px solid transparent;
+            border: 2px solid transparent;
+            cursor: pointer;
         }
 
-        .nav-links a:hover {
-            background: #f0ebf8;
-            color: var(--primary);
-            transform: translateX(5px);
-        }
-
+        .nav-links a:hover { background: #f0ebf8; color: var(--primary); transform: translateX(5px); }
         .nav-links a.active {
             background: var(--primary);
             color: var(--text-light);
-            border-left: 4px solid var(--secondary);
             box-shadow: 0 8px 20px rgba(74, 0, 224, 0.2);
+            transform: scale(1.02);
         }
 
-        .content {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            gap: 4rem;
-            min-width: 0;
+        /* --- Contenedor de Páginas --- */
+        .content { flex: 1; min-width: 0; }
+
+        /* Magia del SPA: Ocultar y mostrar con animación */
+        .page-section { display: none; animation: fadeIn 0.5s ease forwards; }
+        .page-section.active { display: block; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
-        .section-block { scroll-margin-top: 4rem; }
-
-        .bento-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-            gap: 2rem;
-        }
-
-        .card {
-            background: var(--card-bg);
-            border-radius: var(--radius-lg);
-            padding: 2.5rem;
-            box-shadow: var(--shadow);
-            transition: var(--transition);
-            position: relative;
-            overflow: hidden;
-            opacity: 0; 
-            transform: translateY(40px); 
-        }
-
-        .card.visible { opacity: 1; transform: translateY(0); }
-        .card:hover { transform: translateY(-8px); box-shadow: 0 20px 40px rgba(74, 0, 224, 0.1); }
-
+        /* --- Componentes Visuales (Bento Cards) --- */
+        .bento-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem; margin-bottom: 3rem; }
+        .card { background: var(--card-bg); border-radius: var(--radius-lg); padding: 2.5rem; box-shadow: var(--shadow); transition: var(--transition); }
+        .card:hover { transform: translateY(-5px); box-shadow: 0 20px 40px rgba(74, 0, 224, 0.1); }
+        
         .card.purple { background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%); color: var(--text-light); }
         .card.purple p, .card.purple h3, .card.purple li { color: var(--text-light); }
         .card.purple code { background: rgba(255,255,255,0.2); color: white; }
@@ -143,73 +96,36 @@
         ul, ol { margin-left: 1.5rem; margin-bottom: 1.5rem; }
         li { margin-bottom: 0.8rem; }
 
-        .custom-list { list-style: none; margin-left: 0; counter-reset: step-counter; }
-        .custom-list li {
-            position: relative;
-            padding-left: 3.5rem;
-            margin-bottom: 1.5rem;
-            background: white;
-            padding-top: 1.5rem;
-            padding-bottom: 1.5rem;
-            padding-right: 2rem;
-            border-radius: var(--radius-md);
-            box-shadow: var(--shadow);
-            opacity: 0;
-            transform: translateY(20px);
-        }
-
-        .custom-list li.visible { opacity: 1; transform: translateY(0); transition: var(--transition); }
-        .custom-list li::before {
-            counter-increment: step-counter;
-            content: counter(step-counter);
-            position: absolute;
-            left: 1rem;
-            top: 50%;
-            transform: translateY(-50%);
-            background: var(--primary);
-            color: white;
-            width: 35px;
-            height: 35px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-        }
-
-        .data-table { width: 100%; border-collapse: collapse; margin-top: 1rem; background: rgba(255,255,255,0.1); border-radius: var(--radius-md); overflow: hidden; }
-        .data-table th, .data-table td { padding: 1.2rem; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.2); }
-        .data-table th { font-weight: 800; background: rgba(0,0,0,0.1); }
-
         .header-hero {
             background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
             color: white;
-            padding: 5rem 4rem;
+            padding: 4rem 3rem;
             border-radius: var(--radius-lg);
             box-shadow: 0 20px 50px rgba(74, 0, 224, 0.2);
-            opacity: 0;
-            transform: scale(0.95);
+            margin-bottom: 3rem;
         }
-
-        .header-hero.visible { opacity: 1; transform: scale(1); transition: all 0.8s cubic-bezier(0.25, 0.8, 0.25, 1); }
         .header-hero h1, .header-hero p { color: white; }
-
+        
         .badge {
             display: inline-block;
             background: var(--secondary);
             color: white;
             padding: 0.6rem 1.2rem;
             border-radius: 50px;
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             font-weight: 800;
             margin-bottom: 1.5rem;
             text-transform: uppercase;
             letter-spacing: 1px;
         }
 
+        .data-table { width: 100%; border-collapse: collapse; margin-top: 1rem; background: rgba(0,0,0,0.02); border-radius: var(--radius-md); overflow: hidden; }
+        .data-table th, .data-table td { padding: 1.2rem; text-align: left; border-bottom: 1px solid rgba(0,0,0,0.05); }
+        .data-table th { font-weight: 800; background: rgba(74,0,224,0.05); color: var(--primary); }
+
         @media (max-width: 1024px) {
             .container { flex-direction: column; padding: 2rem 1.5rem; }
-            .sidebar { width: 100%; height: auto; position: relative; top: 0; padding: 1.5rem; }
+            .sidebar { width: 100%; position: relative; top: 0; display: flex; flex-direction: column; padding: 1.5rem; }
             .nav-links { flex-direction: row; flex-wrap: wrap; justify-content: center; }
             .nav-links li { width: auto; }
             .header-hero { padding: 3rem 2rem; }
@@ -225,278 +141,207 @@
             <h3>🦾 UR3 Twin Docs</h3>
         </div>
         <ul class="nav-links">
-            <li><a href="#general" class="active">Descripción General</a></li>
-            <li><a href="#arquitectura">Arquitectura de 4 Capas</a></li>
-            <li><a href="#nucleo-ik">Núcleo IK y Simulación</a></li>
-            <li><a href="#seguridad">Pipeline de Seguridad</a></li>
-            <li><a href="#interaccion">Interacción y Control XR</a></li>
-            <li><a href="#comunicacion">Comunicación y Servidores</a></li>
-            <li><a href="#ui-debug">UI, Teclado y Debug</a></li>
-            <li><a href="#dependencias">Dependencias</a></li>
-            <li><a href="#configuracion">Configuración y Flujo</a></li>
+            <li><a class="nav-link active" data-target="page-general">1. Overview y Arquitectura</a></li>
+            <li><a class="nav-link" data-target="page-seguridad">2. Pipeline de Seguridad</a></li>
+            <li><a class="nav-link" data-target="page-ik">3. Núcleo IK y Simulación</a></li>
+            <li><a class="nav-link" data-target="page-interaccion">4. Interacción XR y UI</a></li>
+            <li><a class="nav-link" data-target="page-comunicaciones">5. Setup y Comunicaciones</a></li>
         </ul>
     </nav>
 
     <main class="content">
-        <section class="header-hero scroll-anim" id="general">
-            <span class="badge">Gemelo Digital Interactivo</span>
-            <h1>UR3 Digital Twin — Unity XR</h1>
-            <p>Bienvenido a la documentación oficial del proyecto. Este sistema implementa un gemelo digital (digital twin) altamente interactivo del brazo robótico <strong>Universal Robots UR3</strong>, desarrollado íntegramente en Unity.</p>
-            <p>El proyecto destaca por su integración de tecnologías avanzadas, permitiendo:</p>
-            <ul>
-                <li>Visualizar y controlar el robot de forma virtual utilizando algoritmos de cinemática inversa (IK) para un posicionamiento preciso.</li>
-                <li>Definir poses objetivo en el espacio 3D simplemente arrastrando un marcador en la escena, con compatibilidad nativa para entornos de Realidad Extendida (XR), Aumentada (AR) y Virtual (VR).</li>
-                <li>Generar trayectorias suaves e interpoladas entre la posición actual del robot y la posición objetivo deseada por el usuario.</li>
-                <li>Transmitir estas trayectorias paso a paso hacia un servidor Flask, el cual se encarga de controlar el hardware del robot físico en el mundo real.</li>
-                <li>Previsualizar secuencias de movimiento de forma segura utilizando un "robot fantasma" (ghost) antes de ejecutar cualquier acción real.</li>
-                <li>Monitorear la telemetría obteniendo en tiempo real los ángulos de los joints del robot físico a través de peticiones HTTP.</li>
-            </ul>
-        </section>
 
-        <section id="arquitectura" class="section-block">
-            <h2>Arquitectura del Proyecto</h2>
-            <p>Para garantizar escalabilidad y mantenimiento, el sistema está estructurado en <strong>4 capas fundamentales</strong> que conectan la interfaz del usuario con el hardware industrial.</p>
-            
+        <div id="page-general" class="page-section active">
+            <div class="header-hero">
+                <span class="badge">Digital Twin</span>
+                <h1>UR3 Digital Twin en Unity XR</h1>
+                <p>Gemelo digital interactivo del robot <strong>Universal Robots UR3</strong> desarrollado en Unity, con cinemática inversa, trayectorias, comunicación HTTP con Flask y soporte para realidad extendida (XR/AR/VR).</p>
+            </div>
+
+            <h2>Descripción General</h2>
             <div class="bento-grid">
-                <div class="card purple scroll-anim">
-                    <h3>Capa 1 — Interacción (MR Interface)</h3>
-                    <p>Es la capa más cercana al usuario, gestionando entradas de hardware (cámara passthrough, seguimiento espacial y hand tracking). Incluye gestos como "pinch", menús 3D, dibujo de trayectorias y envío de comandos. Los scripts involucrados son: <code>DrawTrajectoryMeta</code>, <code>RoutinePlacementController</code>, <code>ActivarObjeto</code>, <code>KeyboardButtonController</code>, y <code>EnviarInputRobotProgram</code>.</p>
+                <div class="card purple">
+                    <h3>¿Qué permite este proyecto?</h3>
+                    <p>Este sistema implementa un puente bidireccional entre un entorno virtual y hardware industrial real. Permite:</p>
+                    <ul>
+                        <li>Visualizar y controlar el robot virtualmente mediante <strong>cinemática inversa (IK)</strong>.</li>
+                        <li>Definir una pose objetivo arrastrando un marcador en el espacio 3D.</li>
+                        <li>Generar trayectorias interpoladas entre la posición actual y la posición objetivo.</li>
+                    </ul>
                 </div>
-                
-                <div class="card scroll-anim">
-                    <h3>Capa 2 — Procesamiento</h3>
-                    <p>Aquí ocurre la "magia" matemática. Se capturan las coordenadas, se calcula la cinemática inversa, se interpolan trayectorias (MoveJ, MoveL, MoveC) y, lo más importante, se aplican las restricciones de seguridad. Comprueba autocolisiones, colisiones con superficies y límites del workspace. Usa: <code>UR3SimpleIKPhysical</code> (PreviewSolve), <code>UR3KinematicSafetyChecker</code>, <code>UR3SelfCollisionChecker</code>, <code>UR3WorkspaceLimiter</code> y <code>UR3MotionValidator</code>.</p>
-                </div>
-
-                <div class="card scroll-anim">
-                    <h3>Capa 3 — Simulación</h3>
-                    <p>Es el gemelo digital renderizado en Unity. Recibe los ángulos válidos de la Capa 2 y ejecuta la rutina visual. Se encarga de la visualización de la trayectoria y de la comunicación TCP/IP hacia el mundo exterior. Usa: <code>UR3SimpleIKPhysical</code> (LateUpdate), <code>UR3GhostPlayback</code>, <code>TrajectoryManager</code>, <code>UR3FlaskSender</code> y <code>UR3JointDebugger</code>.</p>
-                </div>
-
-                <div class="card orange scroll-anim">
-                    <h3>Capa 4 — Robot Real</h3>
-                    <p>La capa de ejecución física. El robot UR3 real recibe comandos URScript, ejecuta el movimiento físico y envía su pose actual de vuelta a la Capa 3 como retroalimentación. Además, una cámara en el efector final puede enviar imágenes. Usa: <code>UR3Client</code>, <code>UR3FlaskSender</code>, <code>BotonDeteccion</code>, <code>CameraGetButton</code> y <code>CameraVideoButton</code>.</p>
+                <div class="card orange">
+                    <h3>Características Avanzadas</h3>
+                    <ul>
+                        <li>Enviar la trayectoria generada paso a paso a un <strong>servidor Flask</strong> que controla el hardware real.</li>
+                        <li>Reproducir rutinas en un "robot fantasma" para validación visual previa.</li>
+                        <li>Leer la telemetría (ángulos de los joints) del robot físico vía HTTP en tiempo real.</li>
+                    </ul>
                 </div>
             </div>
-        </section>
 
-        <section id="nucleo-ik" class="section-block">
-            <h2>Núcleo IK y Simulación</h2>
-            <p>Estos componentes son el cerebro del movimiento del robot dentro del motor de Unity.</p>
+            <h2>Arquitectura de 4 Capas</h2>
+            <p>El sistema garantiza una transmisión segura y controlada de la intención del usuario hacia el robot real mediante las siguientes fases:</p>
+            <div class="bento-grid">
+                <div class="card">
+                    <h3 style="color: var(--primary);">Capa 1 — Interacción</h3>
+                    <p>Gestión de hardware de Realidad Mixta (cámara passthrough, hand tracking, posición espacial). Contiene menús flotantes, dibujo de trayectorias 3D y emisión de comandos al servidor.</p>
+                </div>
+                <div class="card">
+                    <h3 style="color: var(--primary);">Capa 2 — Procesamiento</h3>
+                    <p>Resolución de Cinemática Inversa y cálculo de interpolaciones (MoveJ, MoveL, MoveC). Aquí operan las restricciones cinemáticas, autocolisión y validación del workspace.</p>
+                </div>
+                <div class="card">
+                    <h3 style="color: var(--primary);">Capa 3 — Simulación (Unity)</h3>
+                    <p>El gemelo digital renderizado. Recibe los conjuntos de ángulos válidos, anima la rutina visual y se encarga de la comunicación TCP/IP hacia el exterior.</p>
+                </div>
+                <div class="card">
+                    <h3 style="color: var(--primary);">Capa 4 — Robot Real</h3>
+                    <p>Ejecución de los comandos <code>URScript</code> en el brazo industrial. Proporciona retroalimentación de su pose actual y streaming de video desde la cámara montada en el efector final.</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="page-seguridad" class="page-section">
+            <h2>Pipeline de Seguridad</h2>
+            <div class="card purple" style="margin-bottom: 2rem;">
+                <p>Antes de enviar cualquier movimiento al robot físico, el sistema ejecuta verificaciones obligatorias sobre el robot fantasma (ghost) sin afectar al equipo real:</p>
+                <ol>
+                    <li><strong>PreviewSolveToPosition():</strong> Verifica si el solucionador IK logró converger dentro de la tolerancia requerida para alcanzar el target.</li>
+                    <li><strong>CheckJointMargins():</strong> (Vía <code>UR3KinematicSafetyChecker</code>) Revisa que ningún eslabón esté forzándose peligrosamente cerca de su límite mecánico.</li>
+                    <li><strong>CheckSingularityHeuristic():</strong> Detecta configuraciones cercanas a singularidades de codo (q3) o muñeca (q5), previniendo movimientos matemáticamente inestables.</li>
+                    <li><strong>CheckContinuity():</strong> Asegura que el salto angular entre dos frames consecutivos no sea brusco, evaluando el parámetro <code>maxJointJumpDeg</code>.</li>
+                    <li><strong>HasSelfCollision():</strong> (Vía <code>UR3SelfCollisionChecker</code>) Usa físicas de Unity para detectar penetraciones entre eslabones no adyacentes del robot.</li>
+                </ol>
+            </div>
+
+            <h2>Scripts de Validación</h2>
+            <div class="bento-grid">
+                <div class="card">
+                    <h3>🛡️ UR3MotionValidator</h3>
+                    <p>Este script es el director orquestador. Para cada muestra interpolada de la trayectoria, ejecuta todo el pipeline de validación listado arriba. Si cualquier *check* falla, la trayectoria se rechaza inmediatamente y se muestra una razón.</p>
+                </div>
+                <div class="card">
+                    <h3>🚧 UR3WorkspaceLimiter</h3>
+                    <p>Restringe proactivamente la posición del <code>DragTarget</code> al workspace operativo del robot en tiempo real. Utiliza un marco de referencia (AABB y límites radiales XZ) anclado a la base del robot para asegurar que el usuario no pueda apuntar fuera de alcance.</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="page-ik" class="page-section">
+            <h2>Núcleo de Cinemática Inversa (IK)</h2>
+            <p>El cerebro detrás del movimiento del gemelo digital se divide en dos enfoques principales:</p>
             
-            <div class="card scroll-anim" style="margin-bottom: 1.5rem;">
-                <h3>UR3SimpleIKPhysical</h3>
-                <p>Es el componente central del proyecto. Implementa un sofisticado solucionador IK iterativo basado en CCD (Cyclic Coordinate Descent) proyectado sobre ejes locales. A diferencia de solucionadores básicos, este incluye <strong>dinámica física simulada</strong>: maneja velocidades, aceleraciones por joint, límites articulares y se sincroniza con el motor de físicas de Unity mediante <code>Physics.SyncTransforms</code>.</p>
-                <p>Se utiliza en dos modalidades clave:</p>
+            <div class="card" style="margin-bottom: 2rem;">
+                <h3>⚙️ UR3SimpleIKPhysical</h3>
+                <p>Componente central absoluto del proyecto. Implementa un solucionador IK iterativo (CCD proyectado sobre ejes locales) complementado con <strong>dinámica física simulada</strong>. Maneja parámetros como velocidades por joint, aceleraciones, límites articulares y se sincroniza con el motor de físicas de Unity mediante <code>Physics.SyncTransforms</code>.</p>
+                <p><strong>Uso dual:</strong></p>
                 <ul>
-                    <li><strong>Robot Live:</strong> Ejecuta movimientos en tiempo real durante el <code>LateUpdate</code>.</li>
-                    <li><strong>Robot Ghost:</strong> Resuelve la cinemática de forma offline usando el método crucial <code>PreviewSolveToPosition(Vector3 pos, int iterations, float tolerance)</code> para validar el movimiento antes de enviarlo.</li>
+                    <li><strong>Robot Live:</strong> Se ejecuta en <code>LateUpdate</code> para mostrar los movimientos fluidos en tiempo real en la escena.</li>
+                    <li><strong>Robot Ghost:</strong> Resuelve el posicionamiento offline a través de <code>PreviewSolveToPosition(Vector3 pos, int iterations, float tolerance)</code>, clave fundamental para que el pipeline de seguridad analice el futuro sin comprometer el presente.</li>
                 </ul>
-                <p>Gestiona variables como <code>arriveDistance</code>, iteraciones, ejes locales y límites en grados.</p>
             </div>
 
-            <div class="card scroll-anim">
-                <h3>SimpleIKAxisControlled</h3>
-                <p>Es un solucionador alternativo y más ligero. Prescinde de la física y de los límites articulares complejos, por lo que es ideal para objetos de prueba o visualizaciones simples ejecutadas en <code>LateUpdate</code>.</p>
+            <div class="card orange" style="margin-bottom: 2rem;">
+                <h3>🔩 SimpleIKAxisControlled</h3>
+                <p>Solucionador IK alternativo y más ligero, desprovisto de física y límites articulares pesados. Útil principalmente para objetos visuales de prueba, simulaciones ligeras o debug ejecutado puramente en <code>LateUpdate</code>.</p>
             </div>
-        </section>
+        </div>
 
-        <section id="seguridad" class="section-block">
-            <h2>Pipeline y Scripts de Seguridad</h2>
-            <p>Antes de que el brazo mecánico real se mueva, el gemelo digital orquesta una serie de validaciones estrictas para evitar accidentes o daños en el equipo. El flujo sigue este orden:</p>
+        <div id="page-interaccion" class="page-section">
+            <h2>Interacción en Realidad Extendida (XR)</h2>
+            <p>El gemelo digital requiere interfaces de usuario adaptadas a entornos inmersivos.</p>
 
-            <ol class="custom-list">
-                <li class="scroll-anim"><strong>Convergencia (PreviewSolveToPosition):</strong> Verifica si la IK es capaz de alcanzar el objetivo dentro de una tolerancia permitida.</li>
-                <li class="scroll-anim"><strong>Márgenes (UR3KinematicSafetyChecker):</strong> Ejecuta <code>CheckJointMargins()</code> para garantizar que ninguna articulación esté forzándose cerca de sus límites mecánicos.</li>
-                <li class="scroll-anim"><strong>Singularidades (UR3KinematicSafetyChecker):</strong> Ejecuta <code>CheckSingularityHeuristic()</code> para evitar que las articulaciones q3 (codo) o q5 (muñeca) se acerquen peligrosamente a 0°, lo que causaría movimientos erráticos.</li>
-                <li class="scroll-anim"><strong>Continuidad (UR3KinematicSafetyChecker):</strong> Ejecuta <code>CheckContinuity()</code> para asegurar que el salto entre el paso anterior y el actual no exceda el parámetro <code>maxJointJumpDeg</code> (bruscuedad).</li>
-                <li class="scroll-anim"><strong>Autocolisiones (UR3SelfCollisionChecker):</strong> Usa <code>Physics.ComputePenetration</code> para evaluar <code>HasSelfCollision()</code>, detectando penetraciones entre eslabones del robot que no sean adyacentes.</li>
-            </ol>
-            
-            <div class="bento-grid" style="margin-top: 1.5rem;">
-                <div class="card scroll-anim">
-                    <h3>UR3MotionValidator</h3>
-                    <p>Este script actúa como el director de orquesta. Valida trayectorias completas interpolando segmentos entre waypoints, delegando la revisión a los checkers individuales y usando el robot fantasma para simular cada muestra sin riesgo.</p>
-                </div>
-                <div class="card scroll-anim">
-                    <h3>UR3WorkspaceLimiter</h3>
-                    <p>Actúa proactivamente en tiempo real restringiendo la posición del <code>DragTarget</code> al <strong>workspace operativo</strong>. Utiliza un sistema de coordenadas anclado a la base del robot, combinando cajas (AABB) y límites radiales para proyectar el objetivo al punto válido más cercano.</p>
-                </div>
-            </div>
-        </section>
-
-        <section id="interaccion" class="section-block">
-            <h2>Interacción y Control XR</h2>
-            <p>La experiencia de usuario inmersiva se logra gracias a los siguientes scripts:</p>
-            
             <div class="bento-grid">
-                <div class="card purple scroll-anim">
-                    <h3>DrawTrajectoryMeta</h3>
-                    <p>Permite al usuario dibujar una trayectoria en el aire mediante el gesto de "pinch" usando hand tracking (OVR). El trazo comienza siempre desde el efector final (Link6) para asegurar continuidad. Permite exportar los puntos dibujados como archivo CSV.</p>
+                <div class="card purple">
+                    <h3>✍️ DrawTrajectoryMeta</h3>
+                    <p>Permite al usuario dibujar trayectorias espaciales en el aire usando el gesto de "pinch" del hand tracking nativo de Meta Quest (OVR). El trazo inicia garantizadamente desde el efector final (Link6), y los vectores dibujados pueden exportarse como un archivo CSV para análisis posterior.</p>
                 </div>
-                <div class="card scroll-anim">
-                    <h3>RoutinePlacementController</h3>
-                    <p>Controla la interacción de agarrar y soltar. El usuario maneja una esfera (<code>DragTarget</code>) y, al soltarla, su pose se transfiere a un <code>ExecutionTarget</code>, desplegando un botón de confirmación en la UI.</p>
+                <div class="card">
+                    <h3>🎯 RoutinePlacementController</h3>
+                    <p>Controla la interacción física. Al agarrar y arrastrar una esfera (<code>DragTarget</code>) y soltarla, su pose geométrica se clona hacia un <code>ExecutionTarget</code>, detonando la aparición de un botón holográfico para confirmar y validar el movimiento.</p>
                 </div>
-                <div class="card scroll-anim">
-                    <h3>TrajectoryManager</h3>
-                    <p>Se encarga del renderizado visual de la ruta. Mantiene una lista de waypoints y los dibuja en el espacio 3D utilizando un <code>LineRenderer</code> y prefabs de marcadores esféricos.</p>
-                </div>
-                <div class="card scroll-anim">
-                    <h3>ActivarObjeto</h3>
-                    <p>Un controlador sencillo que sirve para alternar la visibilidad del modelo 3D del UR3 y los menús asociados ante eventos XR.</p>
+                <div class="card">
+                    <h3>📈 TrajectoryManager</h3>
+                    <p>Responsable de la previsualización visual del movimiento planificado. Mantiene un array de waypoints y los dibuja en escena usando un <code>LineRenderer</code> y pequeños prefabs esféricos en cada nodo de la ruta.</p>
                 </div>
             </div>
-        </section>
 
-        <section id="comunicacion" class="section-block">
+            <h2>Herramientas de Interfaz de Usuario</h2>
+            <div class="card">
+                <ul style="margin: 0; padding-left: 1rem;">
+                    <li><strong>KeyboardButtonController:</strong> Habilita el teclado nativo de MR (MRTK NonNativeKeyboard) para ingresar texto en cuadros de InputField desde el headset VR.</li>
+                    <li><strong>EnviarInputRobotProgram:</strong> Conecta los comandos ingresados en UI hacia un script ejecutor, reiniciando rutinas en el robot virtual.</li>
+                    <li><strong>UR3GhostPlayback:</strong> Toma secuencias pregrabadas (listas de ángulos) y las anima en el robot fantasma para evaluación visual.</li>
+                    <li><strong>ActivarObjeto:</strong> Script utilitario para alternar la visibilidad de modelos 3D en base a triggers de realidad mixta.</li>
+                </ul>
+            </div>
+        </div>
+
+        <div id="page-comunicaciones" class="page-section">
             <h2>Comunicación y Servidores</h2>
-            <p>El gemelo digital no está aislado; se comunica de forma bidireccional con dos servidores Flask (uno de control y otro de visión) para sincronizarse con el hardware real.</p>
+            <p>El gemelo digital interactúa con el mundo exterior consultando e inyectando datos hacia dos servidores Python (Flask).</p>
 
             <div class="bento-grid">
-                <div class="card scroll-anim">
-                    <h3>UR3FlaskSender</h3>
-                    <p>Genera la trayectoria interpolada usando <code>Lerp</code> lineal, resuelve la IK en el ghost robot y envía cada paso de la rutina hacia el endpoint <code>/movimiento</code> mediante solicitudes POST. Los valores de los joints se envían siempre en radianes.</p>
+                <div class="card orange">
+                    <h3>Servidor de Control (Movimiento)</h3>
+                    <p><strong>UR3FlaskSender:</strong> Genera la trayectoria interpolada usando <code>Lerp</code> lineal y envía cada paso de la rutina hacia el endpoint POST <code>/movimiento</code>. Los valores de los 6 joints se empaquetan en un JSON en radianes.</p>
+                    <p><strong>UR3Client:</strong> Realiza *polling* (consultas continuas) cada 100 ms al endpoint GET <code>/joints</code> para recibir la telemetría actual del hardware y renderizarla en TextMeshPro.</p>
                 </div>
-                <div class="card scroll-anim">
-                    <h3>UR3Client</h3>
-                    <p>Realiza *polling* (consultas) cada 100 milisegundos al endpoint <code>/joints</code> para obtener los ángulos físicos reales del robot y mostrarlos en pantalla (TextMeshPro), asegurando que el estado real y virtual coincidan.</p>
-                </div>
-                <div class="card orange scroll-anim">
-                    <h3>Endpoints de Control</h3>
-                    <ul>
-                        <li><code>GET /joints</code> — Lee telemetría.</li>
-                        <li><code>POST /movimiento</code> — Envía trayectorias.</li>
-                    </ul>
-                </div>
-                <div class="card orange scroll-anim">
-                    <h3>Endpoints de Visión</h3>
-                    <ul>
-                        <li><code>GET /snapshot.jpg</code> — Devuelve un frame de la cámara (Usado por <code>CameraGetButton</code> y <code>CameraVideoButton</code> para streaming a FPS configurables).</li>
-                        <li><code>GET /activar_deteccion</code> y <code>/desactivar_deteccion</code> — Manejados por <code>BotonDeteccion</code> para encender o apagar procesos de visión computacional remotos.</li>
-                    </ul>
+                <div class="card purple">
+                    <h3>Servidor de Visión (Hardware)</h3>
+                    <p><strong>CameraGetButton / CameraVideoButton:</strong> Solicitan iterativamente frames de imagen al endpoint GET <code>/snapshot.jpg</code> simulando streaming de video en tiempo real (proyectado como textura 3D).</p>
+                    <p><strong>BotonDeteccion:</strong> Consume los endpoints <code>/activar_deteccion</code> y <code>/desactivar_deteccion</code> para prender o apagar pipelines de Computer Vision en el entorno Flask desde botones en Unity.</p>
                 </div>
             </div>
-        </section>
 
-        <section id="ui-debug" class="section-block">
-            <h2>UI, Teclado y Utilidades de Debug</h2>
-            <p>Para facilitar las pruebas y la entrada de datos en un entorno sin teclado físico, el proyecto cuenta con varios módulos:</p>
-            
-            <div class="card scroll-anim" style="margin-bottom: 1.5rem;">
-                <ul>
-                    <li><strong>EnviarInputRobotProgram:</strong> Conecta un <code>TMP_InputField</code> con un componente <code>RobotProgram</code> para enviar texto y reiniciar rutinas.</li>
-                    <li><strong>KeyboardButtonController:</strong> Implementa el teclado flotante de Mixed Reality Toolkit (MRTK NonNativeKeyboard) en la escena XR para escribir cómodamente desde las gafas.</li>
-                    <li><strong>UR3GhostPlayback:</strong> Permite reproducir una secuencia pregrabada de ángulos en el robot fantasma para visualizar cómo se vería el movimiento completo.</li>
-                    <li><strong>JointReaderDegrees:</strong> Lee los ángulos locales de los joints en grados normalizándolos a rangos entre -180° y 180°. Se puede invocar con la tecla 'J'.</li>
-                    <li><strong>UR3JointDebugger:</strong> Herramienta visual para imprimir la telemetría del gemelo en un TextMeshPro dentro del entorno XR.</li>
-                </ul>
-            </div>
-        </section>
-
-        <section id="dependencias" class="section-block">
-            <h2>Dependencias del Proyecto</h2>
-            <p>El proyecto está desarrollado en <strong>Unity 2022.3 LTS</strong> con target Android (optimizado para Meta Quest). Depende fuertemente de la versión 83 del SDK de Meta.</p>
-            
-            <div class="card purple scroll-anim">
-                <table class="data-table" style="color: white;">
-                    <tr><th>Paquete</th><th>Versión</th><th>Propósito</th></tr>
-                    <tr><td><code>com.meta.xr.sdk.all</code></td><td>83.0.0</td><td>Hand tracking, interacción, haptics, etc.</td></tr>
-                    <tr><td><code>com.meta.xr.mrutilitykit</code></td><td>83.0.0</td><td>Utilidades MR, Scene Understanding y Anchors.</td></tr>
-                    <tr><td><code>com.unity.xr.oculus</code> / <code>management</code></td><td>4.5.4</td><td>Integración core de XR en Unity.</td></tr>
-                    <tr><td><code>com.itisnajim.socketiounity</code></td><td>git</td><td>Cliente Socket.IO para comunicación en tiempo real.</td></tr>
+            <h2>Dependencias y Setup</h2>
+            <div class="card">
+                <p>Desarrollado sobre <strong>Unity 2022.3 LTS</strong> (Target Android).</p>
+                <table class="data-table">
+                    <tr><th>Paquete Requerido</th><th>Versión</th><th>Función</th></tr>
+                    <tr><td><code>com.meta.xr.sdk.all</code></td><td>83.0.0</td><td>Hand tracking y físicas XR principales.</td></tr>
+                    <tr><td><code>com.meta.xr.mrutilitykit</code></td><td>83.0.0</td><td>Herramientas espaciales (Scene Understanding).</td></tr>
+                    <tr><td><code>com.unity.xr.oculus</code></td><td>4.5.4</td><td>Core de integración Unity-Headset.</td></tr>
+                    <tr><td><code>com.itisnajim.socketiounity</code></td><td>git</td><td>Soporte para web sockets en tiempo real.</td></tr>
                 </table>
-                <p style="margin-top: 1rem; font-size: 0.9em;">*Además, requiere el MRTK NonNativeKeyboard para la entrada de texto en RV y un servidor Python (Flask, ur_rtde) para el robot.</p>
+                <p style="margin-top: 1rem; font-size: 0.9em; color: #666;">Nota: Modificar las IPs en <code>UR3Client.cs</code> y <code>UR3FlaskSender.cs</code> según el servidor local antes de compilar.</p>
             </div>
-        </section>
-
-        <section id="configuracion" class="section-block">
-            <h2>Configuración Rápida y Flujo de Uso</h2>
-            <div class="bento-grid">
-                <div class="card scroll-anim">
-                    <h3>Pasos de Configuración</h3>
-                    <ol>
-                        <li>Clona el repositorio y ábrelo en Unity.</li>
-                        <li>Asigna todos los prefabs y transforms en el Inspector según la arquitectura detallada.</li>
-                        <li>Edita los scripts <code>UR3Client.cs</code> y <code>UR3FlaskSender.cs</code> para que coincidan con la IP de tu red local.</li>
-                        <li>Ejecuta el servidor Flask en la PC conectada al controlador del UR3 físico.</li>
-                        <li>Presiona Play en Unity o compila al headset.</li>
-                    </ol>
-                </div>
-                <div class="card orange scroll-anim">
-                    <h3>Resumen del Flujo</h3>
-                    <p>El usuario realiza un gesto (como un pinch o mover un target) ➜ El gemelo digital calcula el objetivo en la Capa 2 limitándolo al workspace válido ➜ El Pipeline de Seguridad simula la trayectoria ➜ Si es válida, el UR3FlaskSender envía la interpolación paso a paso mediante POST ➜ El UR3 físico se mueve y las cámaras retroalimentan el entorno de Unity.</p>
-                </div>
-            </div>
-        </section>
+        </div>
 
     </main>
 </div>
 
 <script>
 document.addEventListener("DOMContentLoaded", () => {
-    const observerOptions = {
-        root: null,
-        rootMargin: '0px 0px -50px 0px', 
-        threshold: 0.15 
-    };
+    
+    // Capturamos los enlaces y las páginas (secciones)
+    const navLinks = document.querySelectorAll('.nav-link');
+    const pages = document.querySelectorAll('.page-section');
 
-    const scrollObserver = new IntersectionObserver((entries, observer) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.classList.add('visible');
-                observer.unobserve(entry.target);
-            }
-        });
-    }, observerOptions);
-
-    const animElements = document.querySelectorAll('.scroll-anim');
-    animElements.forEach(el => {
-        scrollObserver.observe(el);
-    });
-
-    const navLinks = document.querySelectorAll('.nav-links a');
-    const sections = document.querySelectorAll('.section-block, .header-hero');
-
-    navLinks.forEach(anchor => {
-        anchor.addEventListener('click', function(e) {
+    navLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
             e.preventDefault();
             
-            navLinks.forEach(link => link.classList.remove('active'));
-            this.classList.add('active');
-
-            const targetId = this.getAttribute('href').substring(1);
-            const targetSection = document.getElementById(targetId);
+            // 1. Quitamos la clase 'active' del menú
+            navLinks.forEach(l => l.classList.remove('active'));
             
-            if (targetSection) {
-                window.scrollTo({
-                    top: targetSection.offsetTop - 80, 
-                    behavior: 'smooth'
-                });
-            }
+            // 2. Quitamos la clase 'active' de todas las secciones para ocultarlas
+            pages.forEach(p => p.classList.remove('active'));
+            
+            // 3. Activamos el botón clickeado
+            link.classList.add('active');
+            
+            // 4. Mostramos solo la sección correspondiente al data-target
+            const targetId = link.getAttribute('data-target');
+            document.getElementById(targetId).classList.add('active');
+            
+            // 5. Scroll suave hacia arriba de ser necesario
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         });
     });
 
-    window.addEventListener('scroll', () => {
-        let current = '';
-        
-        sections.forEach(section => {
-            const sectionTop = section.offsetTop;
-            const sectionHeight = section.clientHeight;
-            
-            if (pageYOffset >= (sectionTop - 150)) {
-                current = section.getAttribute('id');
-            }
-        });
-
-        navLinks.forEach(link => {
-            link.classList.remove('active');
-            if (link.getAttribute('href').includes(current)) {
-                link.classList.add('active');
-            }
-        });
-    });
 });
 </script>
+
 </body>
 </html>
