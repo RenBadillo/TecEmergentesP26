@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UR3 Digital Twin — Unity XR | Documentación Completa</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<div class="container">
+    <nav class="sidebar">
+        <div class="sidebar-header">
+            <h3>🦾 UR3 Twin Docs</h3>
+        </div>
+        <ul class="nav-links">
+            <li><a href="#general" class="active">Descripción General</a></li>
+            <li><a href="#arquitectura">Arquitectura de 4 Capas</a></li>
+            <li><a href="#nucleo-ik">Núcleo IK y Simulación</a></li>
+            <li><a href="#seguridad">Pipeline de Seguridad</a></li>
+            <li><a href="#interaccion">Interacción y Control XR</a></li>
+            <li><a href="#comunicacion">Comunicación y Servidores</a></li>
+            <li><a href="#ui-debug">UI, Teclado y Debug</a></li>
+            <li><a href="#dependencias">Dependencias</a></li>
+            <li><a href="#configuracion">Configuración y Flujo</a></li>
+        </ul>
+    </nav>
+
+    <main class="content">
+        
+        <section class="header-hero scroll-anim" id="general">
+            <span class="badge">Gemelo Digital Interactivo</span>
+            <h1>UR3 Digital Twin — Unity XR</h1>
+            <p>Bienvenido a la documentación oficial del proyecto. Este sistema implementa un gemelo digital (digital twin) altamente interactivo del brazo robótico <strong>Universal Robots UR3</strong>, desarrollado íntegramente en Unity.</p>
+            <p>El proyecto destaca por su integración de tecnologías avanzadas, permitiendo:</p>
+            <ul>
+                <li>Visualizar y controlar el robot de forma virtual utilizando algoritmos de cinemática inversa (IK) para un posicionamiento preciso.</li>
+                <li>Definir poses objetivo en el espacio 3D simplemente arrastrando un marcador en la escena, con compatibilidad nativa para entornos de Realidad Extendida (XR), Aumentada (AR) y Virtual (VR).</li>
+                <li>Generar trayectorias suaves e interpoladas entre la posición actual del robot y la posición objetivo deseada por el usuario.</li>
+                <li>Transmitir estas trayectorias paso a paso hacia un servidor Flask, el cual se encarga de controlar el hardware del robot físico en el mundo real.</li>
+                <li>Previsualizar secuencias de movimiento de forma segura utilizando un "robot fantasma" (ghost) antes de ejecutar cualquier acción real.</li>
+                <li>Monitorear la telemetría obteniendo en tiempo real los ángulos de los joints del robot físico a través de peticiones HTTP.</li>
+            </ul>
+        </section>
+
+        <section id="arquitectura" class="section-block">
+            <h2>Arquitectura del Proyecto</h2>
+            <p>Para garantizar escalabilidad y mantenimiento, el sistema está estructurado en <strong>4 capas fundamentales</strong> que conectan la interfaz del usuario con el hardware industrial.</p>
+            
+            <div class="bento-grid">
+                <div class="card purple scroll-anim">
+                    <h3>Capa 1 — Interacción (MR Interface)</h3>
+                    <p>Es la capa más cercana al usuario, gestionando entradas de hardware (cámara passthrough, seguimiento espacial y hand tracking). Incluye gestos como "pinch", menús 3D, dibujo de trayectorias y envío de comandos. Los scripts involucrados son: <code>DrawTrajectoryMeta</code>, <code>RoutinePlacementController</code>, <code>ActivarObjeto</code>, <code>KeyboardButtonController</code>, y <code>EnviarInputRobotProgram</code>.</p>
+                </div>
+                
+                <div class="card scroll-anim">
+                    <h3>Capa 2 — Procesamiento</h3>
+                    <p>Aquí ocurre la "magia" matemática. Se capturan las coordenadas, se calcula la cinemática inversa, se interpolan trayectorias (MoveJ, MoveL, MoveC) y, lo más importante, se aplican las restricciones de seguridad. Comprueba autocolisiones, colisiones con superficies y límites del workspace. Usa: <code>UR3SimpleIKPhysical</code> (PreviewSolve), <code>UR3KinematicSafetyChecker</code>, <code>UR3SelfCollisionChecker</code>, <code>UR3WorkspaceLimiter</code> y <code>UR3MotionValidator</code>.</p>
+                </div>
+
+                <div class="card scroll-anim">
+                    <h3>Capa 3 — Simulación</h3>
+                    <p>Es el gemelo digital renderizado en Unity. Recibe los ángulos válidos de la Capa 2 y ejecuta la rutina visual. Se encarga de la visualización de la trayectoria y de la comunicación TCP/IP hacia el mundo exterior. Usa: <code>UR3SimpleIKPhysical</code> (LateUpdate), <code>UR3GhostPlayback</code>, <code>TrajectoryManager</code>, <code>UR3FlaskSender</code> y <code>UR3JointDebugger</code>.</p>
+                </div>
+
+                <div class="card orange scroll-anim">
+                    <h3>Capa 4 — Robot Real</h3>
+                    <p>La capa de ejecución física. El robot UR3 real recibe comandos URScript, ejecuta el movimiento físico y envía su pose actual de vuelta a la Capa 3 como retroalimentación. Además, una cámara en el efector final puede enviar imágenes. Usa: <code>UR3Client</code>, <code>UR3FlaskSender</code>, <code>BotonDeteccion</code>, <code>CameraGetButton</code> y <code>CameraVideoButton</code>.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="nucleo-ik" class="section-block">
+            <h2>Núcleo IK y Simulación</h2>
+            <p>Estos componentes son el cerebro del movimiento del robot dentro del motor de Unity.</p>
+            
+            <div class="card scroll-anim" style="margin-bottom: 1.5rem;">
+                <h3>UR3SimpleIKPhysical</h3>
+                <p>Es el componente central del proyecto. Implementa un sofisticado solucionador IK iterativo basado en CCD (Cyclic Coordinate Descent) proyectado sobre ejes locales. A diferencia de solucionadores básicos, este incluye <strong>dinámica física simulada</strong>: maneja velocidades, aceleraciones por joint, límites articulares y se sincroniza con el motor de físicas de Unity mediante <code>Physics.SyncTransforms</code>.</p>
+                <p>Se utiliza en dos modalidades clave:</p>
+                <ul>
+                    <li><strong>Robot Live:</strong> Ejecuta movimientos en tiempo real durante el <code>LateUpdate</code>.</li>
+                    <li><strong>Robot Ghost:</strong> Resuelve la cinemática de forma offline usando el método crucial <code>PreviewSolveToPosition(Vector3 pos, int iterations, float tolerance)</code> para validar el movimiento antes de enviarlo.</li>
+                </ul>
+                <p>Gestiona variables como <code>arriveDistance</code>, iteraciones, ejes locales y límites en grados.</p>
+            </div>
+
+            <div class="card scroll-anim">
+                <h3>SimpleIKAxisControlled</h3>
+                <p>Es un solucionador alternativo y más ligero. Prescinde de la física y de los límites articulares complejos, por lo que es ideal para objetos de prueba o visualizaciones simples ejecutadas en <code>LateUpdate</code>.</p>
+            </div>
+        </section>
+
+        <section id="seguridad" class="section-block">
+            <h2>Pipeline y Scripts de Seguridad</h2>
+            <p>Antes de que el brazo mecánico real se mueva, el gemelo digital orquesta una serie de validaciones estrictas para evitar accidentes o daños en el equipo. El flujo sigue este orden:</p>
+
+            <ol class="custom-list">
+                <li class="scroll-anim">
+                    <strong>Convergencia (PreviewSolveToPosition):</strong> Verifica si la IK es capaz de alcanzar el objetivo dentro de una tolerancia permitida.
+                </li>
+                <li class="scroll-anim">
+                    <strong>Márgenes (UR3KinematicSafetyChecker):</strong> Ejecuta <code>CheckJointMargins()</code> para garantizar que ninguna articulación esté forzándose cerca de sus límites mecánicos.
+                </li>
+                <li class="scroll-anim">
+                    <strong>Singularidades (UR3KinematicSafetyChecker):</strong> Ejecuta <code>CheckSingularityHeuristic()</code> para evitar que las articulaciones q3 (codo) o q5 (muñeca) se acerquen peligrosamente a 0°, lo que causaría movimientos erráticos.
+                </li>
+                <li class="scroll-anim">
+                    <strong>Continuidad (UR3KinematicSafetyChecker):</strong> Ejecuta <code>CheckContinuity()</code> para asegurar que el salto entre el paso anterior y el actual no exceda el parámetro <code>maxJointJumpDeg</code> (bruscuedad).
+                </li>
+                <li class="scroll-anim">
+                    <strong>Autocolisiones (UR3SelfCollisionChecker):</strong> Usa <code>Physics.ComputePenetration</code> para evaluar <code>HasSelfCollision()</code>, detectando penetraciones entre eslabones del robot que no sean adyacentes.
+                </li>
+            </ol>
+            
+            <div class="bento-grid" style="margin-top: 1.5rem;">
+                <div class="card scroll-anim">
+                    <h3>UR3MotionValidator</h3>
+                    <p>Este script actúa como el director de orquesta. Valida trayectorias completas interpolando segmentos entre waypoints, delegando la revisión a los checkers individuales y usando el robot fantasma para simular cada muestra sin riesgo.</p>
+                </div>
+                <div class="card scroll-anim">
+                    <h3>UR3WorkspaceLimiter</h3>
+                    <p>Actúa proactivamente en tiempo real restringiendo la posición del <code>DragTarget</code> al <strong>workspace operativo</strong>. Utiliza un sistema de coordenadas anclado a la base del robot, combinando cajas (AABB) y límites radiales para proyectar el objetivo al punto válido más cercano.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="interaccion" class="section-block">
+            <h2>Interacción y Control XR</h2>
+            <p>La experiencia de usuario inmersiva se logra gracias a los siguientes scripts:</p>
+            
+            <div class="bento-grid">
+                <div class="card purple scroll-anim">
+                    <h3>DrawTrajectoryMeta</h3>
+                    <p>Permite al usuario dibujar una trayectoria en el aire mediante el gesto de "pinch" usando hand tracking (OVR). El trazo comienza siempre desde el efector final (Link6) para asegurar continuidad. Permite exportar los puntos dibujados como archivo CSV.</p>
+                </div>
+                <div class="card scroll-anim">
+                    <h3>RoutinePlacementController</h3>
+                    <p>Controla la interacción de agarrar y soltar. El usuario maneja una esfera (<code>DragTarget</code>) y, al soltarla, su pose se transfiere a un <code>ExecutionTarget</code>, desplegando un botón de confirmación en la UI.</p>
+                </div>
+                <div class="card scroll-anim">
+                    <h3>TrajectoryManager</h3>
+                    <p>Se encarga del renderizado visual de la ruta. Mantiene una lista de waypoints y los dibuja en el espacio 3D utilizando un <code>LineRenderer</code> y prefabs de marcadores esféricos.</p>
+                </div>
+                <div class="card scroll-anim">
+                    <h3>ActivarObjeto</h3>
+                    <p>Un controlador sencillo que sirve para alternar la visibilidad del modelo 3D del UR3 y los menús asociados ante eventos XR.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="comunicacion" class="section-block">
+            <h2>Comunicación y Servidores</h2>
+            <p>El gemelo digital no está aislado; se comunica de forma bidireccional con dos servidores Flask (uno de control y otro de visión) para sincronizarse con el hardware real.</p>
+
+            <div class="bento-grid">
+                <div class="card scroll-anim">
+                    <h3>UR3FlaskSender</h3>
+                    <p>Genera la trayectoria interpolada usando <code>Lerp</code> lineal, resuelve la IK en el ghost robot y envía cada paso de la rutina hacia el endpoint <code>/movimiento</code> mediante solicitudes POST. Los valores de los joints se envían siempre en radianes.</p>
+                </div>
+                <div class="card scroll-anim">
+                    <h3>UR3Client</h3>
+                    <p>Realiza *polling* (consultas) cada 100 milisegundos al endpoint <code>/joints</code> para obtener los ángulos físicos reales del robot y mostrarlos en pantalla (TextMeshPro), asegurando que el estado real y virtual coincidan.</p>
+                </div>
+                <div class="card orange scroll-anim">
+                    <h3>Endpoints de Control</h3>
+                    <ul>
+                        <li><code>GET /joints</code> — Lee telemetría.</li>
+                        <li><code>POST /movimiento</code> — Envía trayectorias.</li>
+                    </ul>
+                </div>
+                <div class="card orange scroll-anim">
+                    <h3>Endpoints de Visión</h3>
+                    <ul>
+                        <li><code>GET /snapshot.jpg</code> — Devuelve un frame de la cámara (Usado por <code>CameraGetButton</code> y <code>CameraVideoButton</code> para streaming a FPS configurables).</li>
+                        <li><code>GET /activar_deteccion</code> y <code>/desactivar_deteccion</code> — Manejados por <code>BotonDeteccion</code> para encender o apagar procesos de visión computacional remotos.</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section id="ui-debug" class="section-block">
+            <h2>UI, Teclado y Utilidades de Debug</h2>
+            <p>Para facilitar las pruebas y la entrada de datos en un entorno sin teclado físico, el proyecto cuenta con varios módulos:</p>
+            
+            <div class="card scroll-anim" style="margin-bottom: 1.5rem;">
+                <ul>
+                    <li><strong>EnviarInputRobotProgram:</strong> Conecta un <code>TMP_InputField</code> con un componente <code>RobotProgram</code> para enviar texto y reiniciar rutinas.</li>
+                    <li><strong>KeyboardButtonController:</strong> Implementa el teclado flotante de Mixed Reality Toolkit (MRTK NonNativeKeyboard) en la escena XR para escribir cómodamente desde las gafas.</li>
+                    <li><strong>UR3GhostPlayback:</strong> Permite reproducir una secuencia pregrabada de ángulos en el robot fantasma para visualizar cómo se vería el movimiento completo.</li>
+                    <li><strong>JointReaderDegrees:</strong> Lee los ángulos locales de los joints en grados normalizándolos a rangos entre -180° y 180°. Se puede invocar con la tecla 'J'.</li>
+                    <li><strong>UR3JointDebugger:</strong> Herramienta visual para imprimir la telemetría del gemelo en un TextMeshPro dentro del entorno XR.</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="dependencias" class="section-block">
+            <h2>Dependencias del Proyecto</h2>
+            <p>El proyecto está desarrollado en <strong>Unity 2022.3 LTS</strong> con target Android (optimizado para Meta Quest). Depende fuertemente de la versión 83 del SDK de Meta.</p>
+            
+            <div class="card purple scroll-anim">
+                <table class="data-table" style="color: white;">
+                    <tr><th>Paquete</th><th>Versión</th><th>Propósito</th></tr>
+                    <tr><td><code>com.meta.xr.sdk.all</code></td><td>83.0.0</td><td>Hand tracking, interacción, haptics, etc.</td></tr>
+                    <tr><td><code>com.meta.xr.mrutilitykit</code></td><td>83.0.0</td><td>Utilidades MR, Scene Understanding y Anchors.</td></tr>
+                    <tr><td><code>com.unity.xr.oculus</code> / <code>management</code></td><td>4.5.4</td><td>Integración core de XR en Unity.</td></tr>
+                    <tr><td><code>com.itisnajim.socketiounity</code></td><td>git</td><td>Cliente Socket.IO para comunicación en tiempo real.</td></tr>
+                </table>
+                <p style="margin-top: 1rem; font-size: 0.9em;">*Además, requiere el MRTK NonNativeKeyboard para la entrada de texto en RV y un servidor Python (Flask, ur_rtde) para el robot.</p>
+            </div>
+        </section>
+
+        <section id="configuracion" class="section-block">
+            <h2>Configuración Rápida y Flujo de Uso</h2>
+            <div class="bento-grid">
+                <div class="card scroll-anim">
+                    <h3>Pasos de Configuración</h3>
+                    <ol>
+                        <li>Clona el repositorio y ábrelo en Unity.</li>
+                        <li>Asigna todos los prefabs y transforms en el Inspector según la arquitectura detallada.</li>
+                        <li>Edita los scripts <code>UR3Client.cs</code> y <code>UR3FlaskSender.cs</code> para que coincidan con la IP de tu red local.</li>
+                        <li>Ejecuta el servidor Flask en la PC conectada al controlador del UR3 físico.</li>
+                        <li>Presiona Play en Unity o compila al headset.</li>
+                    </ol>
+                </div>
+                <div class="card orange scroll-anim">
+                    <h3>Resumen del Flujo</h3>
+                    <p>El usuario realiza un gesto (como un pinch o mover un target) ➜ El gemelo digital calcula el objetivo en la Capa 2 limitándolo al workspace válido ➜ El Pipeline de Seguridad simula la trayectoria ➜ Si es válida, el UR3FlaskSender envía la interpolación paso a paso mediante POST ➜ El UR3 físico se mueve y las cámaras retroalimentan el entorno de Unity.</p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
