@@ -922,6 +922,9 @@ td code {
     <button class="nav-item" onclick="goTo('setup')" data-nav="setup">
       <span class="nav-icon">▶</span> Configuración Rápida
     </button>
+    <button class="nav-item" onclick="goTo('media')" data-nav="media">
+      <span class="nav-icon">▶</span> Imágenes y Videos
+    </button>
   </div>
 
   <div class="sidebar-footer">
@@ -1902,6 +1905,91 @@ python server.py</code></pre>
     </div>
   </section>
 
+  <!-- ===== MEDIA ===== -->
+<section class="page-section" id="media">
+
+  <div class="section-head">
+    <h2>Imágenes y Videos del Proyecto</h2>
+    <p>Capturas de la interfaz XR, ejecución en Meta Quest 3 y movimiento del robot real.</p>
+  </div>
+
+  <!-- IMÁGENES -->
+  <h3 style="font-family:var(--mono);font-size:12px;color:var(--text-muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:16px;">Capturas de interfaz</h3>
+
+  <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-bottom:40px;">
+
+    <!-- Cambia src por la ruta de tu imagen en GitHub:
+         Si subes las imágenes a una carpeta /assets/img/ en tu repo,
+         la ruta sería: assets/img/nombre_imagen.png -->
+
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;">
+      <img src="assets/img/interfaz_01.png" alt="Interfaz XR — menú principal"
+           style="width:100%;display:block;aspect-ratio:16/9;object-fit:cover;">
+      <div style="padding:12px 16px;font-size:12px;color:var(--text-dim);">
+        Menú principal flotante en Meta Quest 3
+      </div>
+    </div>
+
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;">
+      <img src="assets/img/interfaz_02.png" alt="Workspace y DragTarget"
+           style="width:100%;display:block;aspect-ratio:16/9;object-fit:cover;">
+      <div style="padding:12px 16px;font-size:12px;color:var(--text-dim);">
+        DragTarget y visualización del workspace
+      </div>
+    </div>
+
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;">
+      <img src="assets/img/interfaz_03.png" alt="Trayectoria dibujada con hand tracking"
+           style="width:100%;display:block;aspect-ratio:16/9;object-fit:cover;">
+      <div style="padding:12px 16px;font-size:12px;color:var(--text-dim);">
+        Trayectoria dibujada con gesto pinch
+      </div>
+    </div>
+
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;">
+      <img src="assets/img/interfaz_04.png" alt="Panel de joints en tiempo real"
+           style="width:100%;display:block;aspect-ratio:16/9;object-fit:cover;">
+      <div style="padding:12px 16px;font-size:12px;color:var(--text-dim);">
+        Panel de joints en tiempo real
+      </div>
+    </div>
+
+  </div>
+
+  <!-- VIDEOS -->
+  <h3 style="font-family:var(--mono);font-size:12px;color:var(--text-muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:16px;">Videos de ejecución</h3>
+
+  <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:14px;">
+
+    <!-- VIDEO 1: Vista desde los lentes (Meta Quest) -->
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;">
+      <video controls style="width:100%;display:block;aspect-ratio:16/9;background:#000;">
+        <!-- Sube el video a assets/video/ en tu repo -->
+        <source src="assets/video/demo_quest.mp4" type="video/mp4">
+        Tu navegador no soporta video HTML5.
+      </video>
+      <div style="padding:12px 16px;">
+        <div style="font-family:var(--mono);font-size:10px;color:var(--accent);letter-spacing:2px;text-transform:uppercase;margin-bottom:4px;">Vista desde el headset</div>
+        <div style="font-size:12px;color:var(--text-dim);">Experiencia en primera persona desde Meta Quest 3: hand tracking, menús flotantes y control del robot.</div>
+      </div>
+    </div>
+
+    <!-- VIDEO 2: Unity + robot real -->
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;">
+      <video controls style="width:100%;display:block;aspect-ratio:16/9;background:#000;">
+        <source src="assets/video/demo_unity_robot.mp4" type="video/mp4">
+        Tu navegador no soporta video HTML5.
+      </video>
+      <div style="padding:12px 16px;">
+        <div style="font-family:var(--mono);font-size:10px;color:var(--accent2);letter-spacing:2px;text-transform:uppercase;margin-bottom:4px;">Unity + Robot Real</div>
+        <div style="font-size:12px;color:var(--text-dim);">Gemelo digital en Unity ejecutando la trayectoria en paralelo con el UR3 físico.</div>
+      </div>
+    </div>
+
+  </div>
+
+</section>
+  
 </main>
 </div>
 
